@@ -1,47 +1,47 @@
-name: Python CI
+name: Python CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
 
 jobs:
-  build:
+  ci-pipeline:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the latest code from your repository
-      - name: Checkout repository
-        uses: actions/checkout@v7
+    # 1. Checkout the repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      # 2. Dynamically set up a stable Python environment (using 3.12 as a robust modern baseline)
-      # and cache your pip dependencies to save workflow run-time.
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v7
-        with:
-          python-version: '3.12'
-          cache: 'pip'
+    # 2. Set up Python 3.12 environment
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip' # Optional: Caches dependencies to speed up subsequent runs
 
-      # 3. Install core tools and any dependencies listed in your project
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pylint pytest black
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    # 3. Install core dependencies, linter, test runner, and formatter
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint pytest black
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # 4. Enforce code quality using Pylint
-      - name: Lint with pylint
-        run: |
-          # Looks for any Python files in your repository and runs linting
-          pylint $(git ls-files '*.py')
+    # 4. Check code formatting with Black (fails if files are not formatted)
+    - name: Check formatting with Black
+      run: |
+        black --check .
 
-      # 5. Run automated tests with Pytest
-      - name: Test with pytest
-        run: |
-          pytest
+    # 5. Lint the codebase with Pylint
+    - name: Lint with Pylint
+      run: |
+        # By default, this will scan all Python files in the repository. 
+        # Customize the target directory if needed (e.g., pylint src/)
+        pylint $(git ls-files '*.py')
 
-      # 6. Check formatting layout using Black (the industry standard Python formatter)
-      - name: Format check with Black
-        run: |
-          black --check .
+    # 6. Run unit tests with Pytest
+    - name: Run tests with Pytest
+      run: |
+        pytest
