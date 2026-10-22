@@ -1,14 +1,15 @@
 install:
 	pip install --upgrade pip && \
-	pip install -r requirements.txt
+		pip install -r requirements.txt
 
 test:
-	#python -m pytest -vv test_hello.py
+	# Uncomment this when you create test_hello.py
+	 python -m pytest -vv test_hello.py
 
 format:
 	black *.py
 
 lint:
-	pylint --disable=R,C *.py
+	find . -maxdepth 1 -name "*.py" | xargs pylint --disable=R,C
 
 all: install format lint test
