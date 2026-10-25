@@ -1,21 +1,36 @@
+import click
 import wikipediaapi
 
 
-def scrape(name, max_sentences=2):
+@click.command()
+@click.option(
+    "--name",
+    prompt="Enter Wikipedia topic",
+    help="The person or topic to search on Wikipedia.",
+)
+@click.option("--max-sentences", default=2, help="Number of sentences for the summary.")
+def scrape(name, max_sentences):
+    # FIX: Pass the language directly as a string "en"
     wiki = wikipediaapi.Wikipedia(
         user_agent="MyWikiScraperBot/1.0 (contact@example.com)", language="en"
     )
 
+    click.echo(click.style("Searching for topic...", fg="blue"), color=True)
+
     page = wiki.page(name)
 
     if page.exists():
-        # Split the text by periods, take the first few elements, and rejoin them
         sentences = page.summary.split(". ")
         short_summary = ". ".join(sentences[:max_sentences])
-        return short_summary + "."
+
+        if not short_summary.endswith("."):
+            short_summary += "."
+
+        click.echo(short_summary)
     else:
-        return f"Page '{name}' not found."
+        click.echo(click.style(f"Page '{name}' not found.", fg="red"), color=True)
 
 
-# Call it with a constraint
-print(scrape("Wikipedia", max_sentences=2))
+if __name__ == "__main__":
+    # pylint: disable=no-value-for-parameter
+    scrape()
